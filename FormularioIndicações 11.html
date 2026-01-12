@@ -1222,7 +1222,7 @@
             const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
             const avaliacaoComport = row.querySelector('[data-field="avaliacaoComportamental"]');
 
-            if (cargoLideranca === 'SIM' && avaliacaoComport.value === 'NÃO') {
+            if (cargoLideranca === 'SIM' && (avaliacaoComport.value === 'NÃO' || avaliacaoComport.value === 'N/A')) {
                 avaliacaoComport.classList.add('error');
                 avaliacaoComport.title = 'BLOQUEADO: Avaliação Comportamental é obrigatória para cargos de liderança!';
                 row.classList.add('row-error');
@@ -1270,7 +1270,7 @@
             const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
             const possuiCarta = row.querySelector('[data-field="possuiCarta"]');
 
-            if (emTreinamento === 'SIM' && possuiCarta.value === 'NÃO') {
+            if (emTreinamento === 'SIM' && (possuiCarta.value === 'NÃO' || possuiCarta.value === 'N/A')) {
                 possuiCarta.classList.add('error'); // Mudado de warning para error
                 possuiCarta.classList.remove('warning');
                 possuiCarta.title = 'BLOQUEADO: Empregado em treinamento sem carta. Contate a Gerência do Departamento Pessoal!';
@@ -1382,8 +1382,7 @@
 
                 const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
                 const avaliacaoComport = row.querySelector('[data-field="avaliacaoComportamental"]').value;
-                
-                if (cargoLideranca === 'SIM' && avaliacaoComport === 'NÃO') {
+                if (cargoLideranca === 'SIM' && (avaliacaoComport === 'NÃO' || avaliacaoComport === 'N/A')) {
                     return true;
                 }
             }
@@ -1403,14 +1402,14 @@
                 const possuiCarta = row.querySelector('[data-field="possuiCarta"]').value;
                 const nome = row.querySelector('[data-field="nome"]').value; // Captura o nome para o aviso
 
-                if (emTreinamento === 'SIM' && possuiCarta === 'NÃO') {
-                // Adiciona a identificação da linha e nome na lista
-                blockedList.push(`• Linha ${index + 1}: ${nome}`);
-            }
-        });
+                if (emTreinamento === 'SIM' && (possuiCarta === 'NÃO' || possuiCarta === 'N/A')) {
+                    // Adiciona a identificação da linha e nome na lista
+                    blockedList.push(`• Linha ${index + 1}: ${nome}`);
+                }
+            });
 
-    return blockedList; // Retorna a lista (se estiver vazia, significa que não há erros)
-}
+            return blockedList; // Retorna a lista (se estiver vazia, significa que não há erros)
+        }
 
         // NOVO: Validar se há avisos (Removida lógica antiga de treinamento pois virou bloqueio)
         function getWarningRows() {
@@ -1656,7 +1655,7 @@
             
             // 1. Bloqueio de Liderança
             if (checkLeadershipBlock()) {
-                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO.\n\nEsses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\nPor favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
+                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO ou N/A.\n\nEsses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\nPor favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
                 return;
             }
 
@@ -1665,8 +1664,7 @@
             if (trainingErrors.length > 0) {
                 // Junta a lista de nomes com quebras de linha
                 const listaNomes = trainingErrors.join('\n');
-    
-                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO.\n\n' +
+                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO ou N/A.\n\n' +
                     'CANDIDATOS COM PENDÊNCIA:\n' + listaNomes + '\n\n' +
                     'Esse(s) candidato(s) não pode(m) ser movimentado(s) sem ter a Carta de Treinamento.\n\n' +
                     'Por favor, retire-o(s) da lista a ser enviada e contacte a Gerência do Departamento Pessoal para solicitar a elaboração da carta de treinamento e coleta das assinaturas, considerando o tempo de formação de até 90 dias, antes da solicitação de movimentação do empregado.');
@@ -1780,7 +1778,7 @@
             
             // 1. Bloqueio de Liderança
             if (checkLeadershipBlock()) {
-                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO.\n\nEsses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\nPor favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
+                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO ou N/A.\n\nEsses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\nPor favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
                 return;
             }
 
@@ -1789,8 +1787,7 @@
             if (trainingErrors.length > 0) {
                 // Junta a lista de nomes com quebras de linha
                 const listaNomes = trainingErrors.join('\n');
-    
-                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO.\n\n' +
+                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO ou N/A.\n\n' +
                     'CANDIDATOS COM PENDÊNCIA:\n' + listaNomes + '\n\n' +
                     'Esse(s) candidato(s) não pode(m) ser movimentado(s) sem ter a Carta de Treinamento.\n\n' +
                     'Por favor, retire-o(s) da lista a ser enviada e contacte a Gerência do Departamento Pessoal para solicitar a elaboração da carta de treinamento e coleta das assinaturas, considerando o tempo de formação de até 90 dias, antes da solicitação de movimentação do empregado.');
