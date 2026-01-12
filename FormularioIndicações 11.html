@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela de Indicações para o Comitê</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #1e3a5f;
+            --secondary-blue: #2c5f8d;
+            --light-blue: #e8f1f8;
+            --gray-dark: #4a4a4a;
+            --gray-medium: #6b6b6b;
+            --gray-light: #e0e0e0;
+            --beige: #f5f3f0;
+            --white: #ffffff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--beige) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--gray-dark);
+        }
+
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Cabeçalho */
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: var(--white);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Formulário de informações */
+        .info-form {
+            padding: 25px 30px;
+            background: var(--beige);
+            border-bottom: 3px solid var(--gray-light);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--primary-blue);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 2px solid var(--gray-light);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+            box-shadow: 0 0 0 3px rgba(44, 95, 141, 0.1);
+        }
+
+        .form-group input.error,
+        .form-group select.error {
+            border-color: var(--danger);
+            background: #fff5f5;
+        }
+
+        /* Controles */
+        .controls {
+            padding: 20px 30px;
+            background: var(--white);
+            border-bottom: 2px solid var(--gray-light);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-blue);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--gray-dark);
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: var(--white);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Painel de Ordenação */
+        .sort-panel {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid var(--gray-light);
+        }
+
+        .sort-panel h3 {
+            color: var(--primary-blue);
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sort-levels {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sort-level {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid var(--gray-light);
+        }
+
+        .sort-level label {
+            font-weight: 600;
+            min-width: 80px;
+            color: var(--gray-dark);
+        }
+
+        .sort-level select {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid var(--gray-light);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* Tabela */
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+            max-height: 600px;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            font-size: 12px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        thead th {
+            padding: 10px 6px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            font-size: 11px;
+        }
+
+        thead th:hover {
+            background: var(--secondary-blue);
+        }
+
+        thead th:last-child {
+            border-right: none;
+        }
+
+        thead th.sorted-asc::after {
+            content: ' ▲';
+            font-size: 10px;
+        }
+
+        thead th.sorted-desc::after {
+            content: ' ▼';
+            font-size: 10px;
+        }
+
+        thead th.th-center {
+            text-align: center;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid var(--gray-light);
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--light-blue);
+        }
+
+        tbody tr.selected {
+            background: #fff3cd;
+        }
+
+        tbody tr.row-error {
+            background: #fff5f5;
+        }
+
+        tbody td {
+            padding: 6px;
+            border-right: 1px solid var(--gray-light);
+        }
+
+        tbody td:last-child {
+            border-right: none;
+        }
+
+        .cell-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 12px;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .cell-input:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+            background: var(--white);
+            box-shadow: 0 0 0 2px rgba(44, 95, 141, 0.1);
+        }
+
+        .cell-input.error {
+            border-color: var(--danger);
+            background: #fff5f5;
+        }
+
+        .cell-input:disabled,
+        .cell-select:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        .cell-select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .cell-select.warning {
+            border-color: var(--warning);
+            background: #fffbf0;
+        }
+
+        .cell-select.error {
+            border-color: var(--danger);
+            background: #fff5f5;
+        }
+
+        /* Campo Híbrido Data com N/A */
+        .date-hybrid-wrapper {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .date-hybrid-select {
+            flex: 0 0 55px;
+            padding: 5px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            background-color: var(--white);
+        }
+
+        .date-hybrid-input {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .date-hybrid-input:disabled,
+        .date-hybrid-select:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        .checkbox-cell {
+            text-align: center;
+            width: 35px;
+        }
+
+        .checkbox-cell input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 750px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+            margin: auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--gray-light);
+        }
+
+        .modal-header h2 {
+            color: var(--primary-blue);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-body p {
+            margin-bottom: 10px;
+        }
+
+        .modal-body h3 {
+            color: var(--secondary-blue);
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-body ul, .modal-body ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .modal-body li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .modal-body .highlight {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 4px solid var(--warning);
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .modal-body .info-box {
+            background: var(--light-blue);
+            padding: 12px;
+            border-left: 4px solid var(--info);
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .modal-body .success-box {
+            background: #d4edda;
+            padding: 12px;
+            border-left: 4px solid var(--success);
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .modal-body .danger-box {
+            background: #f8d7da;
+            padding: 12px;
+            border-left: 4px solid var(--danger);
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .modal-body .warning-box {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 4px solid var(--warning);
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* RODAPÉ */
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            padding: 15px;
+            color: var(--gray-medium);
+            font-size: 12px;
+            border-top: 1px solid var(--gray-light);
+            font-weight: 500;
+        }
+
+        /* Impressão */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .controls,
+            .sort-panel,
+            .btn,
+            .checkbox-cell {
+                display: none !important;
+            }
+
+            .table-container {
+                max-height: none;
+                overflow: visible;
+            }
+
+            thead {
+                position: static;
+            }
+
+            .cell-input {
+                border: none;
+                padding: 4px;
+            }
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table-container {
+                padding: 15px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            .cell-input {
+                font-size: 10px;
+                padding: 4px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                max-width: 100%;
+            }
+
+            .sort-level {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .date-hybrid-wrapper {
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .date-hybrid-select {
+                width: 100%;
+            }
+
+            .date-hybrid-input {
+                width: 100%;
+            }
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background: var(--gray-dark);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 0 4px;
+        }
+
+        .required-field::after {
+            content: ' *';
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tabela de Indicações para o Comitê</h1>
+        </div>
+
+        <div class="info-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="responsavel" class="required-field">Nome do Responsável</label>
+                    <input type="text" id="responsavel" placeholder="Digite o nome do responsável" required>
+                </div>
+                <div class="form-group">
+                    <label for="empresa" class="required-field">Selecione a Empresa</label>
+                    <select id="empresa" required>
+                        <option value="">-- Selecione --</option>
+                        <option value="1">1 - DeMillus SA</option>
+                        <option value="2">2 - DM Lingerie Vendas de Confecções Ltda</option>
+                        <option value="3">3 - Texnor</option>
+                        <option value="4">4 - Texpar</option>
+                        <option value="8">8 - DM Lingerie S/A</option>
+                        <option value="9">9 - BordTex</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="addRow()" title="Adicionar nova linha (Ctrl+N)">
+                <span>➕</span> Adicionar Linha
+            </button>
+            <button class="btn btn-danger" onclick="removeSelectedRows()" title="Remover linhas selecionadas">
+                <span>🗑️</span> Remover Selecionadas
+            </button>
+            <button class="btn btn-success" onclick="showPDFModal()" title="Gerar PDF do documento (Ctrl+P)">
+                <span>📄</span> Gerar PDF
+            </button>
+            <button class="btn btn-warning" onclick="exportCSV()" title="Exportar dados para Excel/CSV (Ctrl+E)">
+                <span>📊</span> Exportar Arquivo
+            </button>
+            <button class="btn btn-info" onclick="showInstructions()" title="Ver instruções de uso (F1)">
+                <span>ℹ️</span> Instruções de Uso
+            </button>
+            <button class="btn btn-primary" onclick="toggleSortPanel()" title="Mostrar/ocultar painel de ordenação">
+                <span>🔀</span> Ordenação Avançada
+            </button>
+        </div>
+
+        <div class="sort-panel" id="sortPanel" style="display: none;">
+            <h3>🔀 Ordenação Avançada (Multi-nível)</h3>
+            <div class="sort-levels">
+                <div class="sort-level">
+                    <label>1º Nível:</label>
+                    <select id="sort1Field">
+                        <option value="">Selecione um campo</option>
+                        <option value="matricula">Matrícula</option>
+                        <option value="nome">Nome</option>
+                        <option value="setorOrigem">Setor Atual</option>
+                        <option value="cargoAtual">Cargo Atual</option>
+                        <option value="setorDestino">Setor de Destino</option>
+                        <option value="cargoProposto">Cargo Proposto</option>
+                        <option value="cargoLideranca">Cargo de Liderança?</option>
+                        <option value="avaliacaoComportamental">R&S Avaliação?</option>
+                        <option value="emTreinamento">Em Treinamento?</option>
+                        <option value="possuiCarta">Possui Carta?</option>
+                        <option value="ehSubstituicao">É Substituição?</option>
+                    </select>
+                    <select id="sort1Order">
+                        <option value="asc">Crescente (A-Z / 0-9)</option>
+                        <option value="desc">Decrescente (Z-A / 9-0)</option>
+                    </select>
+                </div>
+
+                <div class="sort-level">
+                    <label>2º Nível:</label>
+                    <select id="sort2Field">
+                        <option value="">Nenhum</option>
+                        <option value="matricula">Matrícula</option>
+                        <option value="nome">Nome</option>
+                        <option value="setorOrigem">Setor Atual</option>
+                        <option value="cargoAtual">Cargo Atual</option>
+                        <option value="setorDestino">Setor de Destino</option>
+                        <option value="cargoProposto">Cargo Proposto</option>
+                        <option value="cargoLideranca">Cargo de Liderança?</option>
+                        <option value="avaliacaoComportamental">R&S Avaliação?</option>
+                        <option value="emTreinamento">Em Treinamento?</option>
+                        <option value="possuiCarta">Possui Carta?</option>
+                        <option value="ehSubstituicao">É Substituição?</option>
+                    </select>
+                    <select id="sort2Order">
+                        <option value="asc">Crescente (A-Z / 0-9)</option>
+                        <option value="desc">Decrescente (Z-A / 9-0)</option>
+                    </select>
+                </div>
+
+                <div class="sort-level">
+                    <label>3º Nível:</label>
+                    <select id="sort3Field">
+                        <option value="">Nenhum</option>
+                        <option value="matricula">Matrícula</option>
+                        <option value="nome">Nome</option>
+                        <option value="setorOrigem">Setor Atual</option>
+                        <option value="cargoAtual">Cargo Atual</option>
+                        <option value="setorDestino">Setor de Destino</option>
+                        <option value="cargoProposto">Cargo Proposto</option>
+                        <option value="cargoLideranca">Cargo de Liderança?</option>
+                        <option value="avaliacaoComportamental">R&S Avaliação?</option>
+                        <option value="emTreinamento">Em Treinamento?</option>
+                        <option value="possuiCarta">Possui Carta?</option>
+                        <option value="ehSubstituicao">É Substituição?</option>
+                    </select>
+                    <select id="sort3Order">
+                        <option value="asc">Crescente (A-Z / 0-9)</option>
+                        <option value="desc">Decrescente (Z-A / 9-0)</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top: 15px; display: flex; gap: 12px;">
+                <button class="btn btn-success" onclick="applyAdvancedSort()">
+                    <span>✓</span> Aplicar Ordenação
+                </button>
+                <button class="btn btn-danger" onclick="clearSort()">
+                    <span>✗</span> Limpar Ordenação
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="mainTable">
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell"><input type="checkbox" id="selectAll" onchange="selectAllRows(this)"></th>
+                        <th onclick="quickSort('matricula')" title="Clique para ordenar">Matrícula *</th>
+                        <th onclick="quickSort('nome')" title="Clique para ordenar">Nome Completo *</th>
+                        <th onclick="quickSort('setorOrigem')" title="Clique para ordenar">Setor Atual *</th>
+                        <th onclick="quickSort('cargoAtual')" title="Clique para ordenar">Cargo Atual *</th>
+                        <th onclick="quickSort('codSetorDestino')" title="Clique para ordenar">Cód. Setor Destino *</th>
+                        <th onclick="quickSort('setorDestino')" title="Clique para ordenar">Setor de Destino *</th>
+                        <th onclick="quickSort('cargoProposto')" title="Clique para ordenar">Cargo Proposto *</th>
+                        <th onclick="quickSort('cargoLideranca')" title="Clique para ordenar">Cargo Proposto é<br>de Liderança? *</th>
+                        <th onclick="quickSort('avaliacaoComportamental')" title="Clique para ordenar">R&S fez<br>Avaliação?</th>
+                        <th onclick="quickSort('dataAvaliacaoComp')" title="Clique para ordenar" class="th-center">Data da Avaliação<br>Comportamental</th>
+                        <th onclick="quickSort('emTreinamento')" title="Clique para ordenar">Em Treinamento? *</th>
+                        <th onclick="quickSort('possuiCarta')" title="Clique para ordenar">Possui Carta? *</th>
+                        <th onclick="quickSort('dataInicio')" title="Clique para ordenar" class="th-center">Data do Início<br>do Treinamento</th>
+                        <th onclick="quickSort('ehSubstituicao')" title="Clique para ordenar">É Substituição?</th>
+                        <th onclick="quickSort('matriculaSubstituto')" title="Clique para ordenar">Matrícula do<br>Substituído *</th>
+                        <th onclick="quickSort('nomeSubstituto')" title="Clique para ordenar">Nome Completo<br>do Substituído *</th>
+                        <th onclick="quickSort('motivoSubstituicao')" title="Clique para ordenar">Motivo da<br>Substituição *</th>
+                        <th onclick="quickSort('dataDesligamento')" title="Clique para ordenar" class="th-center">Data do Motivo<br>da Substituição</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Tabela criada e desenvolvida por Alan Silva
+        </div>
+        
+    </div>
+
+    <div id="pdfModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📄 Confirmar Geração de PDF</h2>
+            </div>
+            <div class="modal-body" id="modalBody">
+                </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="closePDFModal()">Cancelar</button>
+                <button class="btn btn-success" onclick="generatePDF()">Confirmar e Gerar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ℹ️ Instruções de Uso da Tabela de Indicações para o Comitê</h2>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 14px; color: var(--gray-medium); margin-bottom: 20px;">
+                    Siga estas orientações para preencher corretamente a tabela de indicações e gerar os documentos para envio.
+                </p>
+                <div class="highlight">
+                    <strong>❗Atenção:</strong> Campos marcados com asterisco <strong>(*)</strong> são obrigatórios. A tabela validará automaticamente matrículas numéricas.
+                </div>
+                <h3>📋 1. Informações do Cabeçalho (Obrigatórias)</h3>
+                <div class="info-box">
+                    <ul style="margin-top: 8px;">
+                        <li><strong>Nome do Responsável:</strong> Informe o nome completo do Gestor demandante</li>
+                        <li><strong>Selecione a Empresa:</strong> Escolha a empresa correspondente</li><br>
+                        <strong>‼️Obs.:</strong> Deverá ser feita uma lista de empregado para cada empresa.
+                    </ul>
+                </div>
+
+                <h3>⌨️ 2. Navegação com Teclado</h3>
+                <div class="info-box">
+                    <ul style="margin-top: 8px;">
+                        <li><strong>TAB:</strong> Navegar para o próximo campo</li>
+                        <li><strong>Shift + TAB:</strong> Navegar para o campo anterior</li>
+                        <li><strong>SETAS (→ ← ↑ ↓):</strong> Mover entre células da tabela</li>
+                        <li><strong>ENTER:</strong> Confirmar entrada e mover para o próximo campo</li>
+                    </ul>
+                </div>
+
+                <h3>✏️ 3. Preenchimento da Tabela</h3>
+                <ol>
+                    <li><strong>Matrícula:</strong> Este campo é obrigatório. Preencher apenas com números. <br> Não repita a matrícula!</br></li>
+                    <li><strong>Nome Completo:</strong> Este campo é obrigatório. Digite o nome completo do empregado</li>
+                    <li><strong>Setor Atual:</strong> Este campo é obrigatório. Informe o nome do setor atual</li>
+                    <li><strong>Cargo Atual:</strong> Este campo é obrigatório. Informe o nome do cargo que o empregado ocupa atualmente</li>
+                    <li><strong>Cód. Setor Destino:</strong> Campo obrigatório. Digite exatamente 10 números e será formatado automaticamente (ex: 0102345600 → 0102.3.4.5.6.00)</li>
+                    <li><strong>Setor de Destino:</strong> Este campo é obrigatório. Informe o nome do setor para onde o(s) empregado(s) será(ão) promovido(s)/transferido(s).</li>
+                    <li><strong>Cargo Proposto:</strong> Este campo é obrigatório. Informe o nome do novo cargo após a promoção, ou repita o nome do cargo atual caso não haja mudança.</li>
+                </ol>
+
+                <h3>🔒 4. Campos com Condições Especiais</h3>
+                <div class="highlight">
+                    <strong>⚠️ REGRA CRÍTICA - Cargo Proposto é de Liderança? = SIM</strong>
+                    <p style="margin-top: 8px;">Se selecionado <strong>"SIM"</strong> e o campo "R&S fez Avaliação?" estiver com <strong>"NÃO"</strong>:</p>
+                    <ul style="margin-top: 8px;">
+                        <li>❌ Será exibido um alerta indicando que esse candidato não pode ser movimentado</li>
+                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc NÃO poderão ser gerados</li>
+                        <li>✅ Retire o candidato da lista e solicite a Avaliação Comportamental à área de Recrutamento e Seleção (R&S)</li>
+                    </ul>
+                </div>
+                
+                 <div class="highlight">
+                    <strong>⚠️ REGRA CRÍTICA - Em Treinamento? = SIM</strong>
+                    <p style="margin-top: 8px;">Se selecionado <strong>"SIM"</strong> e o campo "Possui Carta?" estiver com <strong>"NÃO"</strong>:</p>
+                    <ul style="margin-top: 8px;">
+                        <li>❌ Será exibido um alerta indicando que esse candidato não pode ser movimentado sem carta</li>
+                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc NÃO poderão ser gerados</li>
+                         <li>✅ Contacte a Gerência do Departamento Pessoal para elaborar a carta e coletar as assinaturas</li>
+                    </ul>
+                </div>
+
+                <div class="highlight">
+                    <strong>⚠️ REGRA CRÍTICA - Matrículas Repetidas</strong>
+                    <p style="margin-top: 8px;">Se houver <strong>"matrícula"</strong> repetida na tabela:</p>
+                    <ul style="margin-top: 8px;">
+                        <li>❌ Será exibido um alerta indicando quais matrículas aparecem repetidas</li>
+                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc NÃO poderão ser gerados</li>
+                        <li>✅ Retire e/ou altere a matrícula informada</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ É Substituição? = SIM ou NÃO</strong>
+                    <p style="margin-top: 8px;">Se estiver selecionado <strong>"SIM"</strong></p>
+                    <ul style="margin-top: 8px;">
+                        <li>⚠️ Os campos "Matrícula Substituído", "Nome Completo Substituído", "Motivo da Substituição" e "Data do Motivo da Substituição" estarão habilitados e deverão ter seus preenchimentos obrigatórios</li>
+                        <li>⚠️ Se estiver selecionado <strong>"NÃO"</strong> os campos serão bloqueados</li>
+                        <li>✅ Em ambos os casos, os arquivos PDF e CSV/Excel/Libre Office Calc PODERÃO ser gerados</li>
+                    </ul>
+                </div>    
+
+                <h3>📅 5. Campos de Data com Calendário Editável</h3>
+                <p>Os campos de data possuem um componente editável:</p>
+                <ul>
+                    <li>Selecione a opção <strong>"N/A"</strong> no dropdown à esquerda caso o preenchimento deste campo não seja aplicável</li>
+                    <li>Ou selecione a opção <strong>"Data"</strong> e clique no campo para preencher a data no calendário</li>
+                </ul>
+
+                <h3>🔧 6. Funcionalidades Disponíveis</h3>
+                <ul>
+                    <li><strong>➕ Adicionar Linha:</strong> Este comando serve para inserir uma nova linha na tabela</li>
+                    <li><strong>🗑️ Remover Selecionadas:</strong> Este comando serve para excluir linhas marcadas</li>
+                    <li><strong>🔀 Ordenação Avançada:</strong> Este comando serve para ordenar por até 3 campos</li>
+                    <li><strong>📊 Exportar Arquivo:</strong> Este comando serve para gerar um arquivo no formato CSV/Excel/Libre Office Calc para posterior envio à Remuneração e Performance</li>
+                </ul>
+
+                <h3>📄 7. Geração dos Arquivos</h3>
+                <strong>⚠️ IMPORTANTE - Campos Obrigatórios:</strong>
+                    <p style="margin-top: 8px;">Os seguintes campos deverão estar preenchidos para geração do arquivo, seja em PDF ou CSV/Excel/Libre Office Calc:</p>
+                    <ul style="margin-top: 8px;">
+                        <li>Nome do Responsável e Empresa</li>
+                        <li>Matrícula, Nome Completo, Setor de Origem, Cargo Atual</li>
+                        <li>Cód. Setor Destino (10 dígitos), Setor de Destino, Cargo Proposto</li>
+                        <li>Cargo Proposto é de Liderança?, Em Treinamento?, Possui Carta?</li>
+                        <li>Se "É Substituição?" = SIM: Matrícula, Nome e Motivo do Substituído</li>
+                    </ul>
+                <div class="danger-box">
+                    <strong>❌ BLOQUEIO: Liderança SIM + R&S NÃO</strong>
+                    <p style="margin-top: 8px;">A geração dos arquivos estará <strong>BLOQUEADA</strong> se houver linhas com:</p>
+                    <ul style="margin-top: 8px;">
+                        <li>Cargo Proposto é de Liderança? = <strong>SIM</strong></li>
+                        <li>E R&S fez Avaliação? = <strong>NÃO</strong></li>
+                    </ul>
+                    <p style="margin-top: 8px;"><strong>Ação necessária:</strong> Retire esse candidato da lista e solicite a realização da Avaliação Comportamental à R&S.</p>
+                </div>
+                
+                <div class="danger-box">
+                    <strong>❌ BLOQUEIO: Em Treinamento SIM + Carta NÃO</strong>
+                    <p style="margin-top: 8px;">A geração dos arquivos estará <strong>BLOQUEADA</strong> se houver linhas com:</p>
+                    <ul style="margin-top: 8px;">
+                         <li>Em Treinamento? = <strong>SIM</strong></li>
+                        <li>E Possui Carta? = <strong>NÃO</strong></li>
+                    </ul>
+                     <p style="margin-top: 8px;"><strong>Ação necessária:</strong> Regularize a carta junto à Gerência do DP ou retire o candidato da lista.</p>
+                </div>
+
+
+                <h3>💡 Atalhos de Teclado</h3>
+                <div class="success-box">
+                    <span class="keyboard-shortcut">Ctrl + M</span> Este comando acrescentará uma nova linha<br>
+                    <span class="keyboard-shortcut">Ctrl + P</span> Este comando permitirá gerar um arquivo no formado PDF<br>
+                    <span class="keyboard-shortcut">Ctrl + E</span> Este comando permitirá gerar um arquivo no formato CSV/Excel/Libre Office Calc<br>
+                    <span class="keyboard-shortcut">F1</span> Este comando permitirá que você "selecione" este menu com as Instruções de preenchimento da Tabela de Indicações para o Comitê.<br>
+                    <span class="keyboard-shortcut">Setas</span> Este comando permitirá que você navegue na tabela
+                </div>
+
+                <h3>📧 8. Envio para Remuneração e Performance</h3>
+                <div class="info-box">
+                    <p><strong>Após gerar os arquivos em PDF e em CSV/Excel/Libre Office Calc, localize os arquivos na pasta de Downloads, e envie os arquivos gerados por e-mail ao Responsável de Remuneração e Performance:</strong></p>
+                    <ul style="margin-top: 8px;">
+                        <li>Abra seu cliente de e-mail corporativo (Thunderbird, Outlook, Gmail, etc.)</li>
+                        <li>Crie um novo e-mail para o Responsável de Remuneração e Performance</li>
+                        <li>Anexe os arquivos gerados:</li>
+                        <li>✅ Arquivo no formato <strong>PDF</strong> (para visualização)</li>
+                        <li>✅ Arquivo no formato <strong>CSV/Excel/Libre Office Calc</strong> (para processamento)</li>
+                        <li>Revise todos os dados antes de enviar</li>
+                    </ul>
+                    <p style="margin-top: 8px;"><strong>Assunto sugerido:</strong> "Indicações para o Comitê - [Mês] / [Ano]"</p>
+                </div>
+
+                <div class="highlight">
+                    <strong>Modelo de E-mail:</strong><br><br>
+                    <em>Ao Responsável de Remuneração e Performance,</em><br><br>
+                    <em>Estamos enviando em anexo, a Tabela de Indicações para o Comitê com as propostas de promoções/transferências referentes ao período [Mês/Ano].</em><br><br>
+                    <em>Total de indicações: [número]</em><br><br>
+                    <em>Fico à disposição para esclarecimentos.</em><br><br>
+                    <em>Atenciosamente,<br>[Seu Nome]</em>
+                </div>
+
+                 <h3>❓ 9. Dúvidas e Suporte</h3>
+                <p>Em caso de dúvidas, entre em contato com Remuneração e Performance.</p>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeInstructions()">Entendi, Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let rowCounter = 0;
+        let currentSortField = '';
+        let currentSortOrder = 'asc';
+        let currentEditingCell = null;
+
+        // Inicializar com 3 linhas vazias
+        document.addEventListener('DOMContentLoaded', function() {
+            for (let i = 0; i < 3; i++) {
+                addRow();
+            }
+        });
+
+        // Adicionar nova linha
+        function addRow() {
+            rowCounter++;
+            const tbody = document.getElementById('tableBody');
+            const row = tbody.insertRow();
+            row.id = `row-${rowCounter}`;
+            row.innerHTML = `
+                <td class="checkbox-cell"><input type="checkbox" class="row-checkbox"></td>
+                <td><input type="text" class="cell-input" data-field="matricula" placeholder="Matrícula" onblur="validateMatricula(this)" onkeydown="handleCellKeydown(event)"></td>
+                <td><input type="text" class="cell-input" data-field="nome" placeholder="Nome Completo" onkeydown="handleCellKeydown(event)"></td>
+                <td><input type="text" class="cell-input" data-field="setorOrigem" placeholder="Ex: Setor 24" onkeydown="handleCellKeydown(event)"></td>
+                <td><input type="text" class="cell-input" data-field="cargoAtual" placeholder="Ex: Costureira" onkeydown="handleCellKeydown(event)"></td>
+                <td><input type="text" class="cell-input" data-field="codSetorDestino" placeholder="10 dígitos" maxlength="14" onblur="formatCodSetor(this)" oninput="validateCodSetorInput(this)" onkeydown="handleCellKeydown(event)"></td>
+                <td><input type="text" class="cell-input" data-field="setorDestino" placeholder="Ex: Setor 17" onkeydown="handleCellKeydown(event)"></td>
+                <td><input type="text" class="cell-input" data-field="cargoProposto" placeholder="Ex: Aux. Admin." onkeydown="handleCellKeydown(event)"></td>
+                <td>
+                    <select class="cell-select" data-field="cargoLideranca" onchange="handleCargoLiderancaChange(this)" onkeydown="handleCellKeydown(event)">
+                        <option value="">-</option>
+                        <option value="N/A">N/A</option>
+                        <option value="SIM">SIM</option>
+                        <option value="NÃO">NÃO</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="cell-select" data-field="avaliacaoComportamental" onkeydown="handleCellKeydown(event)">
+                        <option value="">-</option>
+                        <option value="N/A">N/A</option>
+                        <option value="SIM">SIM</option>
+                        <option value="NÃO">NÃO</option>
+                    </select>
+                </td>
+                <td>
+                    <div class="date-hybrid-wrapper">
+                        <select class="date-hybrid-select" data-field-select="dataAvaliacaoComp" onchange="toggleDateField(this)" onkeydown="handleCellKeydown(event)">
+                            <option value="data">Data</option>
+                            <option value="na">N/A</option>
+                        </select>
+                        <input type="date" class="date-hybrid-input" data-field="dataAvaliacaoComp" onkeydown="handleCellKeydown(event)">
+                    </div>
+                </td>
+                <td>
+                    <select class="cell-select" data-field="emTreinamento" onchange="handleEmTreinamentoChange(this)" onkeydown="handleCellKeydown(event)">
+                        <option value="">-</option>
+                        <option value="N/A">N/A</option>
+                        <option value="SIM">SIM</option>
+                        <option value="NÃO">NÃO</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="cell-select" data-field="possuiCarta" onchange="validateTrainingAndCert(this)" onkeydown="handleCellKeydown(event)">
+                        <option value="">-</option>
+                        <option value="N/A">N/A</option>
+                        <option value="SIM">SIM</option>
+                        <option value="NÃO">NÃO</option>
+                    </select>
+                </td>
+                <td>
+                    <div class="date-hybrid-wrapper">
+                        <select class="date-hybrid-select" data-field-select="dataInicio" onchange="toggleDateField(this)" onkeydown="handleCellKeydown(event)">
+                            <option value="data">Data</option>
+                            <option value="na">N/A</option>
+                        </select>
+                        <input type="date" class="date-hybrid-input" data-field="dataInicio" onkeydown="handleCellKeydown(event)">
+                    </div>
+                </td>
+                <td>
+                    <select class="cell-select" data-field="ehSubstituicao" onchange="handleEhSubstituicaoChange(this)" onkeydown="handleCellKeydown(event)">
+                        <option value="">-</option>
+                        <option value="SIM">SIM</option>
+                        <option value="NÃO">NÃO</option>
+                    </select>
+                </td>
+                <td><input type="text" class="cell-input" data-field="matriculaSubstituto" placeholder="Matrícula" onblur="validateMatricula(this)" onkeydown="handleCellKeydown(event)"></td>
+                <td><input type="text" class="cell-input" data-field="nomeSubstituto" placeholder="Nome Substituído" onkeydown="handleCellKeydown(event)"></td>
+                <td>
+                    <select class="cell-select" data-field="motivoSubstituicao" onkeydown="handleCellKeydown(event)">
+                        <option value="">-</option>
+                        <option value="N/A">N/A</option>
+                        <option value="PROMOÇÃO">PROMOÇÃO</option>
+                        <option value="DESLIGAMENTO">DESLIGAMENTO</option>
+                        <option value="TRANSFERÊNCIA">TRANSFERÊNCIA</option>
+                    </select>
+                </td>
+                <td>
+                    <div class="date-hybrid-wrapper">
+                        <select class="date-hybrid-select" data-field-select="dataDesligamento" onchange="toggleDateField(this)" onkeydown="handleCellKeydown(event)">
+                            <option value="data">Data</option>
+                            <option value="na">N/A</option>
+                        </select>
+                        <input type="date" class="date-hybrid-input" data-field="dataDesligamento" onkeydown="handleCellKeydown(event)">
+                    </div>
+                </td>
+            `;
+        }
+
+        // NOVO: Navegação com Teclado (Setas e ENTER)
+        function handleCellKeydown(event) {
+            const cell = event.target.closest('td');
+            const row = cell.closest('tr');
+            const cells = row.querySelectorAll('td:not(.checkbox-cell)');
+            const currentCellIndex = Array.from(cells).indexOf(cell);
+
+            if (event.key === 'ArrowRight' || (event.key === 'Enter' && !event.target.matches('textarea'))) {
+                event.preventDefault();
+                const nextCell = cells[currentCellIndex + 1];
+                if (nextCell) {
+                    const input = nextCell.querySelector('input, select');
+                    if (input) input.focus();
+                }
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                const prevCell = cells[currentCellIndex - 1];
+                if (prevCell) {
+                    const input = prevCell.querySelector('input, select');
+                    if (input) input.focus();
+                }
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                const nextRow = row.nextElementSibling;
+                if (nextRow) {
+                    const nextCells = nextRow.querySelectorAll('td:not(.checkbox-cell)');
+                    const input = nextCells[currentCellIndex]?.querySelector('input, select');
+                    if (input) input.focus();
+                }
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                const prevRow = row.previousElementSibling;
+                if (prevRow) {
+                    const prevCells = prevRow.querySelectorAll('td:not(.checkbox-cell)');
+                    const input = prevCells[currentCellIndex]?.querySelector('input, select');
+                    if (input) input.focus();
+                }
+            }
+        }
+
+        // Validar entrada do Código do Setor Destino (apenas números)
+        function validateCodSetorInput(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
+            if (input.value.length > 10) {
+                input.value = input.value.substring(0, 10);
+            }
+            validateCodSetor(input);
+        }
+
+        // Validar Código do Setor Destino (deve ter 10 dígitos)
+        function validateCodSetor(input) {
+            const value = input.value.replace(/\D/g, '');
+            if (value.length > 0 && value.length !== 10) {
+                input.classList.add('error');
+                input.title = 'O Cód. Setor Destino deve conter exatamente 10 dígitos';
+                return false;
+            } else {
+                input.classList.remove('error');
+                input.title = '';
+                return true;
+            }
+        }
+
+        // Formatar Código do Setor Destino
+        function formatCodSetor(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length === 10) {
+                const formatted = value.substring(0, 4) + '.' +
+                                  value.substring(4, 5) + '.' +
+                                  value.substring(5, 6) + '.' +
+                                  value.substring(6, 7) + '.' +
+                                  value.substring(7, 8) + '.' +
+                                  value.substring(8, 10);
+                input.value = formatted;
+                input.classList.remove('error');
+                input.title = '';
+            } else if (value.length > 0) {
+                input.classList.add('error');
+                input.title = 'O Cód. Setor Destino deve conter exatamente 10 dígitos';
+            }
+        }
+
+        // Handler para "Cargo Proposto é de Liderança?"
+        function handleCargoLiderancaChange(selectElement) {
+            const row = selectElement.closest('tr');
+            const avaliacaoSelect = row.querySelector('[data-field="avaliacaoComportamental"]');
+            const dataAvaliacaoSelect = row.querySelector('[data-field-select="dataAvaliacaoComp"]');
+            const dataAvaliacaoInput = row.querySelector('[data-field="dataAvaliacaoComp"]');
+
+            if (selectElement.value === 'N/A' || selectElement.value === 'NÃO') {
+                avaliacaoSelect.disabled = true;
+                avaliacaoSelect.value = '';
+                avaliacaoSelect.classList.remove('error', 'warning');
+                dataAvaliacaoSelect.disabled = true;
+                dataAvaliacaoInput.disabled = true;
+                dataAvaliacaoInput.value = '';
+                // Check if Training error exists before removing row error
+                if (!row.querySelector('[data-field="possuiCarta"]').classList.contains('error')) {
+                    row.classList.remove('row-error');
+                }
+            } else if (selectElement.value === 'SIM') {
+                avaliacaoSelect.disabled = false;
+                dataAvaliacaoSelect.disabled = false;
+                if (dataAvaliacaoSelect.value === 'data') {
+                    dataAvaliacaoInput.disabled = false;
+                }
+                validateLeadershipEvaluation(row);
+            }
+        }
+
+        // NOVO: Validar se Liderança=SIM e Avaliação=NÃO (BLOQUEIO)
+        function validateLeadershipEvaluation(row) {
+            const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
+            const avaliacaoComport = row.querySelector('[data-field="avaliacaoComportamental"]');
+
+            if (cargoLideranca === 'SIM' && avaliacaoComport.value === 'NÃO') {
+                avaliacaoComport.classList.add('error');
+                avaliacaoComport.title = 'BLOQUEADO: Avaliação Comportamental é obrigatória para cargos de liderança!';
+                row.classList.add('row-error');
+            } else {
+                avaliacaoComport.classList.remove('error');
+                avaliacaoComport.title = '';
+                // Check if Training error exists before removing row error
+                if (!row.querySelector('[data-field="possuiCarta"]').classList.contains('error')) {
+                    row.classList.remove('row-error');
+                }
+            }
+        }
+
+        // Handler para "Em Treinamento?"
+        function handleEmTreinamentoChange(selectElement) {
+            const row = selectElement.closest('tr');
+            const possuiCartaSelect = row.querySelector('[data-field="possuiCarta"]');
+            const dataInicioSelect = row.querySelector('[data-field-select="dataInicio"]');
+            const dataInicioInput = row.querySelector('[data-field="dataInicio"]');
+
+            if (selectElement.value === 'N/A' || selectElement.value === 'NÃO') {
+                possuiCartaSelect.disabled = true;
+                possuiCartaSelect.value = '';
+                possuiCartaSelect.classList.remove('warning', 'error');
+                dataInicioSelect.disabled = true;
+                dataInicioInput.disabled = true;
+                dataInicioInput.value = '';
+                // Check if Leadership error exists before removing row error
+                if (!row.querySelector('[data-field="avaliacaoComportamental"]').classList.contains('error')) {
+                    row.classList.remove('row-error');
+                }
+            } else {
+                possuiCartaSelect.disabled = false;
+                dataInicioSelect.disabled = false;
+                if (dataInicioSelect.value === 'data') {
+                    dataInicioInput.disabled = false;
+                }
+                validateTrainingAndCert(possuiCartaSelect);
+            }
+        }
+
+        // NOVO: Validar Treinamento SEM Carta (AGORA BLOQUEIO)
+        function validateTrainingAndCert(selectElement) {
+            const row = selectElement.closest('tr');
+            const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
+            const possuiCarta = row.querySelector('[data-field="possuiCarta"]');
+
+            if (emTreinamento === 'SIM' && possuiCarta.value === 'NÃO') {
+                possuiCarta.classList.add('error'); // Mudado de warning para error
+                possuiCarta.classList.remove('warning');
+                possuiCarta.title = 'BLOQUEADO: Empregado em treinamento sem carta. Contate a Gerência do Departamento Pessoal!';
+                row.classList.add('row-error'); // Adiciona bloqueio na linha
+            } else {
+                possuiCarta.classList.remove('warning', 'error');
+                possuiCarta.title = '';
+                // Check if Leadership error exists before removing row error
+                if (!row.querySelector('[data-field="avaliacaoComportamental"]').classList.contains('error')) {
+                    row.classList.remove('row-error');
+                }
+            }
+        }
+
+        // Handler para "É Substituição?"
+        function handleEhSubstituicaoChange(selectElement) {
+            const row = selectElement.closest('tr');
+            const matriculaSubstInput = row.querySelector('[data-field="matriculaSubstituto"]');
+            const nomeSubstInput = row.querySelector('[data-field="nomeSubstituto"]');
+            const motivoSelect = row.querySelector('[data-field="motivoSubstituicao"]');
+            const dataDesligSelect = row.querySelector('[data-field-select="dataDesligamento"]');
+            const dataDesligInput = row.querySelector('[data-field="dataDesligamento"]');
+
+            if (selectElement.value === 'NÃO') {
+                matriculaSubstInput.disabled = true;
+                matriculaSubstInput.value = '';
+                nomeSubstInput.disabled = true;
+                nomeSubstInput.value = '';
+                motivoSelect.disabled = true;
+                motivoSelect.value = '';
+                dataDesligSelect.disabled = true;
+                dataDesligInput.disabled = true;
+                dataDesligInput.value = '';
+            } else {
+                matriculaSubstInput.disabled = false;
+                nomeSubstInput.disabled = false;
+                motivoSelect.disabled = false;
+                dataDesligSelect.disabled = false;
+                if (dataDesligSelect.value === 'data') {
+                    dataDesligInput.disabled = false;
+                }
+            }
+        }
+
+        // Alternar entre Data e N/A
+        function toggleDateField(selectElement) {
+            const wrapper = selectElement.parentElement;
+            const dateInput = wrapper.querySelector('.date-hybrid-input');
+
+            if (selectElement.value === 'na') {
+                dateInput.disabled = true;
+                dateInput.value = '';
+                dateInput.dataset.naValue = 'N/A';
+            } else {
+                if (!selectElement.disabled) {
+                    dateInput.disabled = false;
+                }
+                delete dateInput.dataset.naValue;
+            }
+        }
+
+        // Converter data para dd/mm/aaaa
+        function convertDateForDisplay(dateValue) {
+            if (!dateValue) return '';
+            const parts = dateValue.split('-');
+            if (parts.length !== 3) return dateValue;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        // Obter valor real do campo de data
+        function getDateFieldValue(dateInput) {
+            if (dateInput.dataset.naValue === 'N/A') {
+                return 'N/A';
+            }
+            return dateInput.value;
+        }
+
+        // Obter matrícula concatenada com empresa
+        function getMatriculaComEmpresa(matriculaValue) {
+            const empresa = document.getElementById('empresa').value;
+            if (!empresa || !matriculaValue) return matriculaValue;
+            return `${empresa}-${matriculaValue}`;
+        }
+
+        // Validar matrícula
+        function validateMatricula(input) {
+            const value = input.value.trim();
+            if (value && !/^\d+$/.test(value)) {
+                input.classList.add('error');
+                input.title = 'A matrícula deve conter apenas números';
+                return false;
+            } else {
+                input.classList.remove('error');
+                input.title = '';
+                return true;
+            }
+        }
+
+        // ============================================
+        // NOVAS FUNÇÕES DE VALIDAÇÃO ESPECÍFICAS
+        // ============================================
+
+        // Verificar Bloqueio de Liderança
+        function checkLeadershipBlock() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            for (const row of rows) {
+                const matricula = row.querySelector('[data-field="matricula"]').value.trim();
+                if (!matricula) continue;
+
+                const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
+                const avaliacaoComport = row.querySelector('[data-field="avaliacaoComportamental"]').value;
+                
+                if (cargoLideranca === 'SIM' && avaliacaoComport === 'NÃO') {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Verificar Bloqueio de Treinamento
+        function checkTrainingBlock() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            const blockedList = []; // Array para guardar os erros encontrados
+
+            rows.forEach((row, index) => {
+                const matricula = row.querySelector('[data-field="matricula"]').value.trim();
+                if (!matricula) return; // Pula linhas vazias
+
+                const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
+                const possuiCarta = row.querySelector('[data-field="possuiCarta"]').value;
+                const nome = row.querySelector('[data-field="nome"]').value; // Captura o nome para o aviso
+
+                if (emTreinamento === 'SIM' && possuiCarta === 'NÃO') {
+                // Adiciona a identificação da linha e nome na lista
+                blockedList.push(`• Linha ${index + 1}: ${nome}`);
+            }
+        });
+
+    return blockedList; // Retorna a lista (se estiver vazia, significa que não há erros)
+}
+
+        // NOVO: Validar se há avisos (Removida lógica antiga de treinamento pois virou bloqueio)
+        function getWarningRows() {
+            const warnings = [];
+            return warnings;
+        }
+
+        // ============================================
+        // Função: Verificar matrículas duplicadas
+        // ============================================
+        function hasDuplicatedMatriculas() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            const matriculas = [];
+            const duplicates = [];
+
+            rows.forEach((row, index) => {
+                const matriculaInput = row.querySelector('[data-field="matricula"]');
+                const matricula = matriculaInput.value.trim();
+                
+                // Considera apenas linhas com matrícula preenchida
+                if (matricula) {
+                    if (matriculas.includes(matricula)) {
+                        if (!duplicates.includes(matricula)) {
+                            duplicates.push(matricula);
+                        }
+                    } else {
+                        matriculas.push(matricula);
+                    }
+                }
+            });
+
+            if (duplicates.length > 0) {
+                return {
+                    hasDuplicates: true,
+                    duplicatedValues: duplicates
+                };
+            }
+
+            return { hasDuplicates: false };
+        }
+
+        // Validar campos obrigatórios
+        function validateRequiredFields() {
+            const errors = [];
+            const responsavel = document.getElementById('responsavel').value.trim();
+            const empresa = document.getElementById('empresa').value;
+            
+            if (!responsavel) errors.push('Nome do Responsável');
+            if (!empresa) errors.push('Selecione a Empresa');
+
+            const rows = document.querySelectorAll('#tableBody tr');
+            let rowNum = 0;
+            
+            rows.forEach((row, index) => {
+                rowNum = index + 1;
+                const matricula = row.querySelector('[data-field="matricula"]').value.trim();
+                const nome = row.querySelector('[data-field="nome"]').value.trim();
+                const setorOrigem = row.querySelector('[data-field="setorOrigem"]').value.trim();
+                const cargoAtual = row.querySelector('[data-field="cargoAtual"]').value.trim();
+                const codSetorDestinoInput = row.querySelector('[data-field="codSetorDestino"]');
+                const codSetorDestino = codSetorDestinoInput.value.trim();
+                const codSetorDestinoNumeros = codSetorDestino.replace(/\D/g, '');
+                const setorDestino = row.querySelector('[data-field="setorDestino"]').value.trim();
+                const cargoProposto = row.querySelector('[data-field="cargoProposto"]').value.trim();
+                const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
+                const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
+                const possuiCarta = row.querySelector('[data-field="possuiCarta"]');
+                const ehSubstituicao = row.querySelector('[data-field="ehSubstituicao"]').value;
+                
+                const hasData = matricula || nome || setorOrigem || cargoAtual || codSetorDestino || setorDestino || cargoProposto;
+                
+                if (hasData) {
+                    if (!matricula) errors.push(`Linha ${rowNum}: Matrícula`);
+                    if (!nome) errors.push(`Linha ${rowNum}: Nome Completo`);
+                    if (!setorOrigem) errors.push(`Linha ${rowNum}: Setor de Origem`);
+                    if (!cargoAtual) errors.push(`Linha ${rowNum}: Cargo Atual`);
+                    if (!codSetorDestino) {
+                        errors.push(`Linha ${rowNum}: Cód. Setor Destino`);
+                    } else if (codSetorDestinoNumeros.length !== 10) {
+                        errors.push(`Linha ${rowNum}: Cód. Setor Destino (deve conter exatamente 10 dígitos)`);
+                        codSetorDestinoInput.classList.add('error');
+                    }
+                    if (!setorDestino) errors.push(`Linha ${rowNum}: Setor de Destino`);
+                    if (!cargoProposto) errors.push(`Linha ${rowNum}: Cargo Proposto`);
+                    if (!cargoLideranca) errors.push(`Linha ${rowNum}: Cargo Proposto é de Liderança?`);
+                    if (!emTreinamento) errors.push(`Linha ${rowNum}: Em Treinamento?`);
+                    if (!possuiCarta.disabled && !possuiCarta.value) errors.push(`Linha ${rowNum}: Possui Carta?`);
+                    if (ehSubstituicao === 'SIM') {
+                        const matriculaSubst = row.querySelector('[data-field="matriculaSubstituto"]').value.trim();
+                        const nomeSubst = row.querySelector('[data-field="nomeSubstituto"]').value.trim();
+                        const motivoSubst = row.querySelector('[data-field="motivoSubstituicao"]').value;
+                        
+                        if (!matriculaSubst) errors.push(`Linha ${rowNum}: Matrícula do Substituído`);
+                        if (!nomeSubst) errors.push(`Linha ${rowNum}: Nome Completo do Substituído`);
+                        if (!motivoSubst) errors.push(`Linha ${rowNum}: Motivo da Substituição`);
+                    }
+                }
+            });
+            return errors;
+        }
+
+        // Remover linhas selecionadas
+        function removeSelectedRows() {
+            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Selecione pelo menos uma linha para remover.');
+                return;
+            }
+            
+            if (confirm(`Deseja realmente remover ${checkboxes.length} linha(s)?`)) {
+                checkboxes.forEach(checkbox => {
+                    checkbox.closest('tr').remove();
+                });
+                document.getElementById('selectAll').checked = false;
+            }
+        }
+
+        // Selecionar todas as linhas
+        function selectAllRows(checkbox) {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        }
+
+        // Toggle painel de ordenação
+        function toggleSortPanel() {
+            const panel = document.getElementById('sortPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Ordenação rápida
+        function quickSort(field) {
+            document.querySelectorAll('thead th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            if (currentSortField === field) {
+                currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortOrder = 'asc';
+            }
+            currentSortField = field;
+
+            sortTableByField(field, currentSortOrder);
+            const clickedHeader = event.target;
+            clickedHeader.classList.add(currentSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+
+        // Aplicar ordenação avançada
+        function applyAdvancedSort() {
+            const sort1Field = document.getElementById('sort1Field').value;
+            const sort1Order = document.getElementById('sort1Order').value;
+            const sort2Field = document.getElementById('sort2Field').value;
+            const sort2Order = document.getElementById('sort2Order').value;
+            const sort3Field = document.getElementById('sort3Field').value;
+            const sort3Order = document.getElementById('sort3Order').value;
+
+            if (!sort1Field) {
+                alert('Selecione pelo menos o 1º nível de ordenação.');
+                return;
+            }
+
+            const tbody = document.getElementById('tableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                let result = compareValues(a, b, sort1Field, sort1Order);
+                if (result !== 0) return result;
+
+                if (sort2Field) {
+                    result = compareValues(a, b, sort2Field, sort2Order);
+                    if (result !== 0) return result;
+                }
+
+                if (sort3Field) {
+                    result = compareValues(a, b, sort3Field, sort3Order);
+                }
+
+                return result;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+            
+            document.querySelectorAll('thead th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+        }
+
+        // Limpar ordenação
+        function clearSort() {
+            document.getElementById('sort1Field').value = '';
+            document.getElementById('sort2Field').value = '';
+            document.getElementById('sort3Field').value = '';
+            document.querySelectorAll('thead th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+        }
+
+        // Ordenação por campo
+        function sortTableByField(field, order) {
+            const tbody = document.getElementById('tableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => compareValues(a, b, field, order));
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Comparar valores
+        function compareValues(rowA, rowB, field, order) {
+            let aVal = rowA.querySelector(`[data-field="${field}"]`)?.value || '';
+            let bVal = rowB.querySelector(`[data-field="${field}"]`)?.value || '';
+
+            if (field === 'matricula' || field === 'matriculaSubstituto') {
+                aVal = parseInt(aVal) || 0;
+                bVal = parseInt(bVal) || 0;
+            } else {
+                aVal = aVal.toLowerCase();
+                bVal = bVal.toLowerCase();
+            }
+
+            let result = 0;
+            if (aVal < bVal) result = -1;
+            if (aVal > bVal) result = 1;
+
+            return order === 'asc' ? result : -result;
+        }
+
+        // Exportar CSV/Excel
+        function exportCSV() {
+            // ============================================
+            // VALIDAÇÃO DE MATRÍCULAS DUPLICADAS
+            // ============================================
+            const duplicateCheck = hasDuplicatedMatriculas();
+            if (duplicateCheck.hasDuplicates) {
+                alert('❌ BLOQUEADO: Existem matrículas duplicadas na tabela.\n\nMatrículas repetidas: ' + duplicateCheck.duplicatedValues.join(', ') + '\n\nPor favor, corrija as matrículas duplicadas antes de exportar o Excel.');
+                return;
+            }
+
+            // ============================================
+            // VERIFICAÇÕES DE BLOQUEIO SEPARADAS
+            // ============================================
+            
+            // 1. Bloqueio de Liderança
+            if (checkLeadershipBlock()) {
+                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO.\n\nEsses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\nPor favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
+                return;
+            }
+
+            // 2. Bloqueio de Treinamento
+            const trainingErrors = checkTrainingBlock(); // Pega a lista de erros
+            if (trainingErrors.length > 0) {
+                // Junta a lista de nomes com quebras de linha
+                const listaNomes = trainingErrors.join('\n');
+    
+                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO.\n\n' +
+                    'CANDIDATOS COM PENDÊNCIA:\n' + listaNomes + '\n\n' +
+                    'Esse(s) candidato(s) não pode(m) ser movimentado(s) sem ter a Carta de Treinamento.\n\n' +
+                    'Por favor, retire-o(s) da lista a ser enviada e contacte a Gerência do Departamento Pessoal para solicitar a elaboração da carta de treinamento e coleta das assinaturas, atrelando o tempo de formação de até 90 dias, antes de solicitar a movimentação para o referido empregado.');
+                return;
+            }
+
+            const errors = validateRequiredFields();
+            if (errors.length > 0) {
+                alert('Preencha os campos obrigatórios antes de exportar:\n\n• ' + errors.join('\n• '));
+                return;
+            }
+
+            const responsavel = document.getElementById('responsavel').value;
+            const empresaSelect = document.getElementById('empresa');
+            const empresaText = empresaSelect.options[empresaSelect.selectedIndex].text;
+            
+            const headers = [
+                'Matrícula', 'Nome Completo', 'Setor de Origem', 'Cargo Atual', 'Cód. Setor Destino',
+                'Setor de Destino', 'Cargo Proposto', 'Cargo de Liderança?', 'R&S fez Avaliação?',
+                'Data Avaliação Comportamental', 'Em Treinamento?', 'Possui Carta?',
+                'Data Início Treinamento', 'É Substituição?', 'Matrícula Substituído', 'Nome Substituído',
+                'Motivo Substituição', 'Data Motivo Substituição'
+            ];
+            
+            let csv = `Responsável: ${responsavel}\nEmpresa: ${empresaText}\n\n`;
+            csv += headers.join(';') + '\n';
+
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(row => {
+                const matricula = row.querySelector('[data-field="matricula"]').value;
+                if (!matricula) return;
+                
+                const matriculaCompleta = getMatriculaComEmpresa(matricula);
+                const nome = row.querySelector('[data-field="nome"]').value;
+                const setorOrigem = row.querySelector('[data-field="setorOrigem"]').value;
+                const cargoAtual = row.querySelector('[data-field="cargoAtual"]').value;
+                const codSetorDestino = row.querySelector('[data-field="codSetorDestino"]').value;
+                const setorDestino = row.querySelector('[data-field="setorDestino"]').value;
+                const cargoProposto = row.querySelector('[data-field="cargoProposto"]').value;
+                const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
+                const avaliacaoComp = row.querySelector('[data-field="avaliacaoComportamental"]').value;
+                
+                const dataAvalInput = row.querySelector('[data-field="dataAvaliacaoComp"]');
+                let dataAval = getDateFieldValue(dataAvalInput);
+                if (dataAval && dataAval !== 'N/A') dataAval = convertDateForDisplay(dataAval);
+                
+                const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
+                const possuiCarta = row.querySelector('[data-field="possuiCarta"]').value;
+                
+                const dataInicioInput = row.querySelector('[data-field="dataInicio"]');
+                let dataInicio = getDateFieldValue(dataInicioInput);
+                if (dataInicio && dataInicio !== 'N/A') dataInicio = convertDateForDisplay(dataInicio);
+                
+                const ehSubstituicao = row.querySelector('[data-field="ehSubstituicao"]').value;
+                const matriculaSubst = row.querySelector('[data-field="matriculaSubstituto"]').value;
+                const matriculaSubstCompleta = ehSubstituicao === 'SIM' && matriculaSubst ? getMatriculaComEmpresa(matriculaSubst) : matriculaSubst;
+                const nomeSubst = row.querySelector('[data-field="nomeSubstituto"]').value;
+                const motivoSubst = row.querySelector('[data-field="motivoSubstituicao"]').value;
+                
+                const dataDesligInput = row.querySelector('[data-field="dataDesligamento"]');
+                let dataDeslig = getDateFieldValue(dataDesligInput);
+                if (dataDeslig && dataDeslig !== 'N/A') dataDeslig = convertDateForDisplay(dataDeslig);
+
+                const values = [
+                    matriculaCompleta, nome, setorOrigem, cargoAtual, codSetorDestino,
+                    setorDestino, cargoProposto, cargoLideranca, avaliacaoComp,
+                    dataAval, emTreinamento, possuiCarta, dataInicio,
+                    ehSubstituicao, matriculaSubstCompleta, nomeSubst, motivoSubst, dataDeslig
+                ].map(v => `"${(v || '').replace(/"/g, '""')}"`);
+                
+                csv += values.join(';') + '\n';
+            });
+            
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Indicacoes_Promocao_${date}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Mostrar modal de instruções
+        function showInstructions() {
+            document.getElementById('instructionsModal').classList.add('show');
+        }
+
+        // Fechar modal de instruções
+        function closeInstructions() {
+            document.getElementById('instructionsModal').classList.remove('show');
+        }
+
+        // Mostrar modal PDF
+        function showPDFModal() {
+            // ============================================
+            // VALIDAÇÃO DE MATRÍCULAS DUPLICADAS
+            // ============================================
+            const duplicateCheck = hasDuplicatedMatriculas();
+            if (duplicateCheck.hasDuplicates) {
+                alert('❌ BLOQUEADO: Existem matrículas duplicadas na tabela.\n\nMatrículas repetidas: ' + duplicateCheck.duplicatedValues.join(', ') + '\n\nPor favor, corrija as matrículas duplicadas antes de gerar o PDF.');
+                return;
+            }
+
+            // ============================================
+            // VERIFICAÇÕES DE BLOQUEIO SEPARADAS
+            // ============================================
+            
+            // 1. Bloqueio de Liderança
+            if (checkLeadershipBlock()) {
+                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO.\n\nEsses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\nPor favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
+                return;
+            }
+
+            // 2. Bloqueio de Treinamento
+            const trainingErrors = checkTrainingBlock(); // Pega a lista de erros
+            if (trainingErrors.length > 0) {
+                // Junta a lista de nomes com quebras de linha
+                const listaNomes = trainingErrors.join('\n');
+    
+                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO.\n\n' +
+                    'CANDIDATOS COM PENDÊNCIA:\n' + listaNomes + '\n\n' +
+                    'Esse(s) candidato(s) não pode(m) ser movimentado(s) sem ter a Carta de Treinamento.\n\n' +
+                    'Por favor, retire-o(s) da lista a ser enviada e contacte a Gerência do Departamento Pessoal para solicitar a elaboração da carta de treinamento e coleta das assinaturas, atrelando o tempo de formação de até 90 dias, antes de solicitar a movimentação para o referido empregado.');
+                return;
+            }
+
+            const errors = validateRequiredFields();
+            if (errors.length > 0) {
+                alert('Preencha os campos obrigatórios antes de gerar o PDF:\n\n• ' + errors.join('\n• '));
+                return;
+            }
+
+            let warningMessage = '';
+
+            const responsavel = document.getElementById('responsavel').value;
+            const empresaSelect = document.getElementById('empresa');
+            const empresaText = empresaSelect.options[empresaSelect.selectedIndex].text;
+            const rows = document.querySelectorAll('#tableBody tr');
+            const selectedRows = document.querySelectorAll('.row-checkbox:checked').length;
+            let totalRows = 0;
+            rows.forEach(row => {
+                const matricula = row.querySelector('[data-field="matricula"]').value;
+                if (matricula) totalRows++;
+            });
+
+            const today = new Date().toLocaleDateString('pt-BR');
+            const modalBody = document.getElementById('modalBody');
+
+            modalBody.innerHTML = `
+                <p><strong>Responsável:</strong> ${responsavel}</p>
+                <p><strong>Empresa:</strong> ${empresaText}</p>
+                <p><strong>Data de Geração:</strong> ${today}</p>
+                <p><strong>Total de Linhas:</strong> ${totalRows}</p>
+                ${selectedRows > 0 ? `<p><strong>Linhas Selecionadas:</strong> ${selectedRows} (apenas estas serão exportadas)</p>` : ''}
+                ${warningMessage}
+                <p style="margin-top: 20px; color: var(--gray-medium);">O PDF será gerado no formato A4 (paisagem) com margens de 0,1cm.</p>
+                <div class="info-box" style="margin-top: 15px;">
+                    <strong>📧 Lembre-se:</strong> Envie tanto o PDF quanto o Excel para a área de Remuneração e Performance.
+                </div>
+            `;
+
+            document.getElementById('pdfModal').classList.add('show');
+        }
+
+        // Fechar modal PDF
+        function closePDFModal() {
+            document.getElementById('pdfModal').classList.remove('show');
+        }
+
+        // Gerar PDF
+        async function generatePDF() {
+            closePDFModal();
+            const responsavel = document.getElementById('responsavel').value;
+            const empresaSelect = document.getElementById('empresa');
+            const empresaText = empresaSelect.options[empresaSelect.selectedIndex].text;
+            const today = new Date().toLocaleDateString('pt-BR');
+            const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+            // 1. Criar o container
+            const pdfContent = document.createElement('div');
+            // 2. ESTILO ROBUSTO:
+            // Usamos 'block' normal para que ele ocupe espaço real no DOM.
+            // Definimos fundo branco e cor preta forçada.
+            pdfContent.style.width = '289mm';
+            // Largura A4 Paisagem aproximada
+            pdfContent.style.background = '#ffffff';
+            pdfContent.style.color = '#000000';
+            pdfContent.style.fontFamily = 'Arial, sans-serif';
+            pdfContent.style.fontSize = '8pt';
+            pdfContent.style.padding = '0';
+            pdfContent.style.margin = '0 auto';
+            // Centraliza
+            
+            // Importante: Isso garante que o elemento seja visível, mas não quebre o layout visual do usuário drasticamente
+            // Ele vai aparecer no final da página por um breve momento.
+            pdfContent.style.display = 'block'; 
+
+            // Conteúdo HTML
+            let htmlContent = `
+                <div style="text-align: center; margin-bottom: 15px; border-bottom: 3px solid #1e3a5f; padding-bottom: 10px;">
+                    <h1 style="color: #1e3a5f; margin: 0; font-size: 16pt;">Tabela de Indicações para o Comitê</h1>
+                    <p style="margin: 5px 0; font-size: 9pt; color: #333;">Data: ${today} | Responsável: ${responsavel} | Empresa: ${empresaText}</p>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 6.5pt; margin-top: 10px; color: #000;">
+                    <thead>
+                        <tr style="background: #1e3a5f; color: white;">
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left; width: 46px;">Mat.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Nome</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Setor Orig.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Cargo Atual</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Cód. Setor Dest.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Setor Dest.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Cargo Prop.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Lider.?</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">R&S?</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Dt Aval.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Trein.?</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Carta?</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Dt Iníc.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Subst.?</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Mat. Sub.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Nome Sub.</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Motivo</th>
+                            <th style="border: 1px solid #ddd; padding: 4px; text-align: left;">Dt Mot.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            const rows = document.querySelectorAll('#tableBody tr');
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            const hasSelection = selectedCheckboxes.length > 0;
+
+            rows.forEach(row => {
+                const checkbox = row.querySelector('.row-checkbox');
+                if (hasSelection && !checkbox.checked) return;
+
+                const matricula = row.querySelector('[data-field="matricula"]').value;
+                if (!matricula) return;
+                
+                const matriculaCompleta = getMatriculaComEmpresa(matricula);
+                const nome = row.querySelector('[data-field="nome"]').value;
+                const setorOrigem = row.querySelector('[data-field="setorOrigem"]').value;
+                const cargoAtual = row.querySelector('[data-field="cargoAtual"]').value;
+                const codSetorDestino = row.querySelector('[data-field="codSetorDestino"]').value;
+                const setorDestino = row.querySelector('[data-field="setorDestino"]').value;
+                const cargoProposto = row.querySelector('[data-field="cargoProposto"]').value;
+                const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
+                const avaliacaoComp = row.querySelector('[data-field="avaliacaoComportamental"]').value;
+                
+                const dataAvalInput = row.querySelector('[data-field="dataAvaliacaoComp"]');
+                let dataAval = getDateFieldValue(dataAvalInput);
+                if (dataAval && dataAval !== 'N/A') dataAval = convertDateForDisplay(dataAval);
+                
+                const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
+                const possuiCarta = row.querySelector('[data-field="possuiCarta"]').value;
+                
+                const dataInicioInput = row.querySelector('[data-field="dataInicio"]');
+                let dataInicio = getDateFieldValue(dataInicioInput);
+                if (dataInicio && dataInicio !== 'N/A') dataInicio = convertDateForDisplay(dataInicio);
+                
+                const ehSubstituicao = row.querySelector('[data-field="ehSubstituicao"]').value;
+                const matriculaSubst = row.querySelector('[data-field="matriculaSubstituto"]').value;
+                const matriculaSubstCompleta = ehSubstituicao === 'SIM' && matriculaSubst ? getMatriculaComEmpresa(matriculaSubst) : matriculaSubst;
+                const nomeSubst = row.querySelector('[data-field="nomeSubstituto"]').value;
+                const motivoSubst = row.querySelector('[data-field="motivoSubstituicao"]').value;
+                
+                const dataDesligInput = row.querySelector('[data-field="dataDesligamento"]');
+                let dataDeslig = getDateFieldValue(dataDesligInput);
+                if (dataDeslig && dataDeslig !== 'N/A') dataDeslig = convertDateForDisplay(dataDeslig);
+
+                // TR com page-break-inside: avoid
+                htmlContent += `
+                    <tr style="page-break-inside: avoid; background-color: #fff;">
+                        <td style="border: 1px solid #ddd; padding: 2px;">${matriculaCompleta}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${nome}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${setorOrigem}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${cargoAtual}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${codSetorDestino}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${setorDestino}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${cargoProposto}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px; text-align: center;">${cargoLideranca}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px; text-align: center;">${avaliacaoComp}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${dataAval}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px; text-align: center;">${emTreinamento}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px; text-align: center;">${possuiCarta}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${dataInicio}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px; text-align: center;">${ehSubstituicao}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${matriculaSubstCompleta}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${nomeSubst}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${motivoSubst}</td>
+                        <td style="border: 1px solid #ddd; padding: 2px;">${dataDeslig}</td>
+                    </tr>
+                `;
+            });
+
+            htmlContent += `
+                    </tbody>
+                </table>
+            `;
+
+            pdfContent.innerHTML = htmlContent;
+
+            // 3. ANEXAR AO FINAL DO BODY (Visível no fluxo normal)
+            document.body.appendChild(pdfContent);
+
+            // Pequeno hack: Esperar o navegador renderizar o elemento antes de capturar
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const options = {
+                margin: [5, 1, 5, 5], // Margens explícitas (Top, Left, Bottom, Right)
+                filename: `Indicacoes_Promocao_${date}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    scrollY: 0, // Ignora o scroll atual da página
+                    logging: true // Útil para debug se necessário
+                },
+                jsPDF: { orientation: 'l', unit: 'mm', format: 'a4' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            // 4. Gerar e remover
+            try {
+                await html2pdf().set(options).from(pdfContent).save();
+            } catch (err) {
+                console.error('Erro ao gerar PDF:', err);
+                alert('Erro ao gerar PDF.');
+            } finally {
+                // Remover o elemento temporário
+                document.body.removeChild(pdfContent);
+            }
+        }
+
+        // Fechar modais ao clicar fora
+        window.onclick = function(event) {
+            const pdfModal = document.getElementById('pdfModal');
+            const instructionsModal = document.getElementById('instructionsModal');
+            if (event.target === pdfModal) {
+                closePDFModal();
+            }
+            if (event.target === instructionsModal) {
+                closeInstructions();
+            }
+        }
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'm') {
+                e.preventDefault();
+                addRow();
+            }
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                showPDFModal();
+            }
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                exportCSV();
+            }
+            if (e.key === 'F1') {
+                e.preventDefault();
+                showInstructions();
+            }
+            if (e.key === 'Escape') {
+                closePDFModal();
+                closeInstructions();
+            }
+        });
+    </script>
+</body>
+</html>
