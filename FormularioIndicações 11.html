@@ -826,7 +826,6 @@
             </div>
         </div>
     </div>
-
     <div id="instructionsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -875,8 +874,9 @@
                     <p style="margin-top: 8px;">Se selecionado <strong>"SIM"</strong> e o campo "R&S fez Avaliação?" estiver com <strong>"NÃO"</strong>:</p>
                     <ul style="margin-top: 8px;">
                         <li>❌ Será exibido um alerta indicando que esse candidato não pode ser movimentado</li>
-                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc NÃO poderão ser gerados</li>
+                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc <U>NÃO</U> poderão ser gerados</li>
                         <li>✅ Retire o candidato da lista e solicite a Avaliação Comportamental à área de Recrutamento e Seleção (R&S)</li>
+                        <li>⚠️ Se estiver selecionado "N/A" os outros campos estarão livres para preenchimento</li>
                     </ul>
                 </div>
                 
@@ -885,8 +885,8 @@
                     <p style="margin-top: 8px;">Se selecionado <strong>"SIM"</strong> e o campo "Possui Carta?" estiver com <strong>"NÃO"</strong>:</p>
                     <ul style="margin-top: 8px;">
                         <li>❌ Será exibido um alerta indicando que esse candidato não pode ser movimentado sem carta</li>
-                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc NÃO poderão ser gerados</li>
-                         <li>✅ Contacte a Gerência do Departamento Pessoal para elaborar a carta e coletar as assinaturas</li>
+                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc <U>NÃO</U> poderão ser gerados</li>
+                         <li>✅ Contacte a Gerência do Departamento Pessoal para elaborar a carta de treinamento e coletar as assinaturas</li>
                     </ul>
                 </div>
 
@@ -895,7 +895,7 @@
                     <p style="margin-top: 8px;">Se houver <strong>"matrícula"</strong> repetida na tabela:</p>
                     <ul style="margin-top: 8px;">
                         <li>❌ Será exibido um alerta indicando quais matrículas aparecem repetidas</li>
-                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc NÃO poderão ser gerados</li>
+                        <li>❌ Os arquivos PDF e CSV/Excel/Libre Office Calc <U>NÃO</U> poderão ser gerados</li>
                         <li>✅ Retire e/ou altere a matrícula informada</li>
                     </ul>
                 </div>
@@ -952,7 +952,7 @@
                          <li>Em Treinamento? = <strong>SIM</strong></li>
                         <li>E Possui Carta? = <strong>NÃO</strong></li>
                     </ul>
-                     <p style="margin-top: 8px;"><strong>Ação necessária:</strong> Regularize a carta junto à Gerência do DP ou retire o candidato da lista.</p>
+                     <p style="margin-top: 8px;"><strong>Ação necessária:</strong> Retire esse candidato da lista e regularize a carta de treinamento junto à Gerência do DP.</p>
                 </div>
 
 
@@ -1012,6 +1012,61 @@
             }
         });
 
+        // ============================================
+        // FUNÇÃO CENTRAL DE ESTILO DE ERRO NA LINHA
+        // ============================================
+        function updateRowErrorState(row) {
+            // Verifica se existe ALGUM campo com a classe 'error' nesta linha
+            if (row.querySelector('.error')) {
+                row.classList.add('row-error'); // Pinta a linha de vermelho
+            } else {
+                row.classList.remove('row-error'); // Remove o vermelho se não houver erros
+            }
+        }
+
+        // ============================================
+        // VALIDAÇÃO DE MATRÍCULAS DUPLICADAS (VISUAL)
+        // ============================================
+        function checkAllMatriculas() {
+            const allRows = document.querySelectorAll('#tableBody tr');
+            const matriculaCounts = {};
+            const inputs = [];
+
+            // 1. Contar ocorrências
+            allRows.forEach(row => {
+                const input = row.querySelector('[data-field="matricula"]');
+                if (input && input.value.trim() !== '') {
+                    const val = input.value.trim();
+                    matriculaCounts[val] = (matriculaCounts[val] || 0) + 1;
+                    inputs.push({ input: input, val: val, row: row });
+                } else if (input) {
+                    // Limpa erro se estiver vazio (mas mantém erro numérico se for o caso)
+                    if (!input.classList.contains('numeric-error')) {
+                        input.classList.remove('error');
+                        input.title = '';
+                    }
+                    updateRowErrorState(row);
+                }
+            });
+
+            // 2. Aplicar erro visual
+            inputs.forEach(item => {
+                // Se for duplicado (count > 1)
+                if (matriculaCounts[item.val] > 1) {
+                    item.input.classList.add('error');
+                    item.input.title = 'Matrícula duplicada!';
+                } else {
+                    // Se não é duplicado, verifica se é número válido antes de remover erro
+                    if (/^\d+$/.test(item.val)) {
+                        item.input.classList.remove('error');
+                        item.input.classList.remove('numeric-error');
+                        item.input.title = '';
+                    }
+                }
+                updateRowErrorState(item.row);
+            });
+        }
+
         // Adicionar nova linha
         function addRow() {
             rowCounter++;
@@ -1020,7 +1075,7 @@
             row.id = `row-${rowCounter}`;
             row.innerHTML = `
                 <td class="checkbox-cell"><input type="checkbox" class="row-checkbox"></td>
-                <td><input type="text" class="cell-input" data-field="matricula" placeholder="Matrícula" onblur="validateMatricula(this)" onkeydown="handleCellKeydown(event)"></td>
+                <td><input type="text" class="cell-input" data-field="matricula" placeholder="Matrícula" onblur="validateMatricula(this)" oninput="checkAllMatriculas()" onkeydown="handleCellKeydown(event)"></td>
                 <td><input type="text" class="cell-input" data-field="nome" placeholder="Nome Completo" onkeydown="handleCellKeydown(event)"></td>
                 <td><input type="text" class="cell-input" data-field="setorOrigem" placeholder="Ex: Setor 24" onkeydown="handleCellKeydown(event)"></td>
                 <td><input type="text" class="cell-input" data-field="cargoAtual" placeholder="Ex: Costureira" onkeydown="handleCellKeydown(event)"></td>
@@ -1036,7 +1091,7 @@
                     </select>
                 </td>
                 <td>
-                    <select class="cell-select" data-field="avaliacaoComportamental" onkeydown="handleCellKeydown(event)">
+                    <select class="cell-select" data-field="avaliacaoComportamental" onchange="validateLeadershipEvaluation(this.closest('tr'))" onkeydown="handleCellKeydown(event)">
                         <option value="">-</option>
                         <option value="N/A">N/A</option>
                         <option value="SIM">SIM</option>
@@ -1107,7 +1162,7 @@
             `;
         }
 
-        // NOVO: Navegação com Teclado (Setas e ENTER)
+        // Navegação com Teclado
         function handleCellKeydown(event) {
             const cell = event.target.closest('td');
             const row = cell.closest('tr');
@@ -1147,7 +1202,6 @@
             }
         }
 
-        // Validar entrada do Código do Setor Destino (apenas números)
         function validateCodSetorInput(input) {
             input.value = input.value.replace(/[^0-9]/g, '');
             if (input.value.length > 10) {
@@ -1156,7 +1210,6 @@
             validateCodSetor(input);
         }
 
-        // Validar Código do Setor Destino (deve ter 10 dígitos)
         function validateCodSetor(input) {
             const value = input.value.replace(/\D/g, '');
             if (value.length > 0 && value.length !== 10) {
@@ -1170,7 +1223,6 @@
             }
         }
 
-        // Formatar Código do Setor Destino
         function formatCodSetor(input) {
             let value = input.value.replace(/\D/g, '');
             if (value.length === 10) {
@@ -1189,7 +1241,6 @@
             }
         }
 
-        // Handler para "Cargo Proposto é de Liderança?"
         function handleCargoLiderancaChange(selectElement) {
             const row = selectElement.closest('tr');
             const avaliacaoSelect = row.querySelector('[data-field="avaliacaoComportamental"]');
@@ -1203,10 +1254,8 @@
                 dataAvaliacaoSelect.disabled = true;
                 dataAvaliacaoInput.disabled = true;
                 dataAvaliacaoInput.value = '';
-                // Check if Training error exists before removing row error
-                if (!row.querySelector('[data-field="possuiCarta"]').classList.contains('error')) {
-                    row.classList.remove('row-error');
-                }
+                // Limpa erro se existia
+                updateRowErrorState(row);
             } else if (selectElement.value === 'SIM') {
                 avaliacaoSelect.disabled = false;
                 dataAvaliacaoSelect.disabled = false;
@@ -1217,26 +1266,25 @@
             }
         }
 
-        // NOVO: Validar se Liderança=SIM e Avaliação=NÃO (BLOQUEIO)
+        // ============================================
+        // VALIDAÇÃO LIDERANÇA (DESTAQUE VERMELHO)
+        // ============================================
         function validateLeadershipEvaluation(row) {
             const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
             const avaliacaoComport = row.querySelector('[data-field="avaliacaoComportamental"]');
 
-            if (cargoLideranca === 'SIM' && (avaliacaoComport.value === 'NÃO' || avaliacaoComport.value === 'N/A')) {
-                avaliacaoComport.classList.add('error');
+            // BLOQUEIO SOMENTE SE 'NÃO'. SE FOR 'N/A', PASSA NORMAL.
+            if (cargoLideranca === 'SIM' && avaliacaoComport.value === 'NÃO') {
+                avaliacaoComport.classList.add('error'); // Borda vermelha no campo
                 avaliacaoComport.title = 'BLOQUEADO: Avaliação Comportamental é obrigatória para cargos de liderança!';
-                row.classList.add('row-error');
             } else {
                 avaliacaoComport.classList.remove('error');
                 avaliacaoComport.title = '';
-                // Check if Training error exists before removing row error
-                if (!row.querySelector('[data-field="possuiCarta"]').classList.contains('error')) {
-                    row.classList.remove('row-error');
-                }
             }
+            // Atualiza a linha inteira baseada se existe algum erro nela
+            updateRowErrorState(row);
         }
 
-        // Handler para "Em Treinamento?"
         function handleEmTreinamentoChange(selectElement) {
             const row = selectElement.closest('tr');
             const possuiCartaSelect = row.querySelector('[data-field="possuiCarta"]');
@@ -1250,10 +1298,8 @@
                 dataInicioSelect.disabled = true;
                 dataInicioInput.disabled = true;
                 dataInicioInput.value = '';
-                // Check if Leadership error exists before removing row error
-                if (!row.querySelector('[data-field="avaliacaoComportamental"]').classList.contains('error')) {
-                    row.classList.remove('row-error');
-                }
+                // Limpa erro se existia
+                updateRowErrorState(row);
             } else {
                 possuiCartaSelect.disabled = false;
                 dataInicioSelect.disabled = false;
@@ -1264,28 +1310,27 @@
             }
         }
 
-        // NOVO: Validar Treinamento SEM Carta (AGORA BLOQUEIO)
+        // ============================================
+        // VALIDAÇÃO TREINAMENTO (DESTAQUE VERMELHO)
+        // ============================================
         function validateTrainingAndCert(selectElement) {
             const row = selectElement.closest('tr');
             const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
             const possuiCarta = row.querySelector('[data-field="possuiCarta"]');
 
-            if (emTreinamento === 'SIM' && (possuiCarta.value === 'NÃO' || possuiCarta.value === 'N/A')) {
-                possuiCarta.classList.add('error'); // Mudado de warning para error
+            // Condição: Treinamento SIM e Carta NÃO
+            if (emTreinamento === 'SIM' && possuiCarta.value === 'NÃO' || possuiCarta.value === 'N/A') {
+                possuiCarta.classList.add('error'); // Borda vermelha no campo
                 possuiCarta.classList.remove('warning');
-                possuiCarta.title = 'BLOQUEADO: Empregado em treinamento sem carta. Contate a Gerência do Departamento Pessoal!';
-                row.classList.add('row-error'); // Adiciona bloqueio na linha
+                possuiCarta.title = 'BLOQUEADO: Empregado em treinamento sem carta.';
             } else {
                 possuiCarta.classList.remove('warning', 'error');
                 possuiCarta.title = '';
-                // Check if Leadership error exists before removing row error
-                if (!row.querySelector('[data-field="avaliacaoComportamental"]').classList.contains('error')) {
-                    row.classList.remove('row-error');
-                }
             }
+            // Atualiza a linha inteira
+            updateRowErrorState(row);
         }
 
-        // Handler para "É Substituição?"
         function handleEhSubstituicaoChange(selectElement) {
             const row = selectElement.closest('tr');
             const matriculaSubstInput = row.querySelector('[data-field="matriculaSubstituto"]');
@@ -1315,7 +1360,6 @@
             }
         }
 
-        // Alternar entre Data e N/A
         function toggleDateField(selectElement) {
             const wrapper = selectElement.parentElement;
             const dateInput = wrapper.querySelector('.date-hybrid-input');
@@ -1332,7 +1376,6 @@
             }
         }
 
-        // Converter data para dd/mm/aaaa
         function convertDateForDisplay(dateValue) {
             if (!dateValue) return '';
             const parts = dateValue.split('-');
@@ -1340,7 +1383,6 @@
             return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
-        // Obter valor real do campo de data
         function getDateFieldValue(dateInput) {
             if (dateInput.dataset.naValue === 'N/A') {
                 return 'N/A';
@@ -1348,78 +1390,73 @@
             return dateInput.value;
         }
 
-        // Obter matrícula concatenada com empresa
         function getMatriculaComEmpresa(matriculaValue) {
             const empresa = document.getElementById('empresa').value;
             if (!empresa || !matriculaValue) return matriculaValue;
             return `${empresa}-${matriculaValue}`;
         }
 
-        // Validar matrícula
         function validateMatricula(input) {
             const value = input.value.trim();
+            // Validação de formato (Números)
             if (value && !/^\d+$/.test(value)) {
                 input.classList.add('error');
+                input.classList.add('numeric-error');
                 input.title = 'A matrícula deve conter apenas números';
-                return false;
             } else {
-                input.classList.remove('error');
-                input.title = '';
-                return true;
-            }
-        }
-
-        // ============================================
-        // NOVAS FUNÇÕES DE VALIDAÇÃO ESPECÍFICAS
-        // ============================================
-
-        // Verificar Bloqueio de Liderança
-        function checkLeadershipBlock() {
-            const rows = document.querySelectorAll('#tableBody tr');
-            for (const row of rows) {
-                const matricula = row.querySelector('[data-field="matricula"]').value.trim();
-                if (!matricula) continue;
-
-                const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
-                const avaliacaoComport = row.querySelector('[data-field="avaliacaoComportamental"]').value;
-                if (cargoLideranca === 'SIM' && (avaliacaoComport === 'NÃO' || avaliacaoComport === 'N/A')) {
-                    return true;
+                if(input.classList.contains('numeric-error')) {
+                    input.classList.remove('error');
+                    input.classList.remove('numeric-error');
+                    input.title = '';
                 }
             }
-            return false;
+            // Chama a validação de duplicidade global
+            checkAllMatriculas();
         }
 
-        // Verificar Bloqueio de Treinamento
-        function checkTrainingBlock() {
+        // ============================================
+        // FUNÇÕES DE VERIFICAÇÃO PARA O BOTÃO (BLOQUEIO)
+        // ============================================
+
+        function checkLeadershipBlock() {
             const rows = document.querySelectorAll('#tableBody tr');
-            const blockedList = []; // Array para guardar os erros encontrados
+            const blockedList = [];
 
             rows.forEach((row, index) => {
                 const matricula = row.querySelector('[data-field="matricula"]').value.trim();
-                if (!matricula) return; // Pula linhas vazias
+                if (!matricula) return;
 
-                const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
-                const possuiCarta = row.querySelector('[data-field="possuiCarta"]').value;
-                const nome = row.querySelector('[data-field="nome"]').value; // Captura o nome para o aviso
+                const cargoLideranca = row.querySelector('[data-field="cargoLideranca"]').value;
+                const avaliacaoComport = row.querySelector('[data-field="avaliacaoComportamental"]').value;
+                const nome = row.querySelector('[data-field="nome"]').value;
 
-                if (emTreinamento === 'SIM' && (possuiCarta === 'NÃO' || possuiCarta === 'N/A')) {
-                    // Adiciona a identificação da linha e nome na lista
+                // SOMENTE SE 'NÃO'. N/A NÃO BLOQUEIA.
+                if (cargoLideranca === 'SIM' && avaliacaoComport === 'NÃO') {
                     blockedList.push(`• Linha ${index + 1}: ${nome}`);
                 }
             });
-
-            return blockedList; // Retorna a lista (se estiver vazia, significa que não há erros)
+            return blockedList;
         }
 
-        // NOVO: Validar se há avisos (Removida lógica antiga de treinamento pois virou bloqueio)
-        function getWarningRows() {
-            const warnings = [];
-            return warnings;
+        function checkTrainingBlock() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            const blockedList = [];
+
+            rows.forEach((row, index) => {
+                const matricula = row.querySelector('[data-field="matricula"]').value.trim();
+                if (!matricula) return;
+
+                const emTreinamento = row.querySelector('[data-field="emTreinamento"]').value;
+                const possuiCarta = row.querySelector('[data-field="possuiCarta"]').value;
+                const nome = row.querySelector('[data-field="nome"]').value;
+
+                if (emTreinamento === 'SIM' && possuiCarta === 'NÃO' || possuiCarta.value === 'N/A') {
+                    blockedList.push(`• Linha ${index + 1}: ${nome}`);
+                }
+            });
+            return blockedList;
         }
 
-        // ============================================
-        // Função: Verificar matrículas duplicadas
-        // ============================================
         function hasDuplicatedMatriculas() {
             const rows = document.querySelectorAll('#tableBody tr');
             const matriculas = [];
@@ -1429,7 +1466,6 @@
                 const matriculaInput = row.querySelector('[data-field="matricula"]');
                 const matricula = matriculaInput.value.trim();
                 
-                // Considera apenas linhas com matrícula preenchida
                 if (matricula) {
                     if (matriculas.includes(matricula)) {
                         if (!duplicates.includes(matricula)) {
@@ -1442,16 +1478,11 @@
             });
 
             if (duplicates.length > 0) {
-                return {
-                    hasDuplicates: true,
-                    duplicatedValues: duplicates
-                };
+                return { hasDuplicates: true, duplicatedValues: duplicates };
             }
-
             return { hasDuplicates: false };
         }
 
-        // Validar campos obrigatórios
         function validateRequiredFields() {
             const errors = [];
             const responsavel = document.getElementById('responsavel').value.trim();
@@ -1511,7 +1542,6 @@
             return errors;
         }
 
-        // Remover linhas selecionadas
         function removeSelectedRows() {
             const checkboxes = document.querySelectorAll('.row-checkbox:checked');
             if (checkboxes.length === 0) {
@@ -1524,10 +1554,11 @@
                     checkbox.closest('tr').remove();
                 });
                 document.getElementById('selectAll').checked = false;
+                // Revalidar duplicatas após remoção
+                checkAllMatriculas();
             }
         }
 
-        // Selecionar todas as linhas
         function selectAllRows(checkbox) {
             const checkboxes = document.querySelectorAll('.row-checkbox');
             checkboxes.forEach(cb => {
@@ -1535,13 +1566,11 @@
             });
         }
 
-        // Toggle painel de ordenação
         function toggleSortPanel() {
             const panel = document.getElementById('sortPanel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Ordenação rápida
         function quickSort(field) {
             document.querySelectorAll('thead th').forEach(th => {
                 th.classList.remove('sorted-asc', 'sorted-desc');
@@ -1559,7 +1588,6 @@
             clickedHeader.classList.add(currentSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
         }
 
-        // Aplicar ordenação avançada
         function applyAdvancedSort() {
             const sort1Field = document.getElementById('sort1Field').value;
             const sort1Order = document.getElementById('sort1Order').value;
@@ -1599,7 +1627,6 @@
             });
         }
 
-        // Limpar ordenação
         function clearSort() {
             document.getElementById('sort1Field').value = '';
             document.getElementById('sort2Field').value = '';
@@ -1609,7 +1636,6 @@
             });
         }
 
-        // Ordenação por campo
         function sortTableByField(field, order) {
             const tbody = document.getElementById('tableBody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -1618,7 +1644,6 @@
             rows.forEach(row => tbody.appendChild(row));
         }
 
-        // Comparar valores
         function compareValues(rowA, rowB, field, order) {
             let aVal = rowA.querySelector(`[data-field="${field}"]`)?.value || '';
             let bVal = rowB.querySelector(`[data-field="${field}"]`)?.value || '';
@@ -1638,33 +1663,28 @@
             return order === 'asc' ? result : -result;
         }
 
-        // Exportar CSV/Excel
         function exportCSV() {
-            // ============================================
-            // VALIDAÇÃO DE MATRÍCULAS DUPLICADAS
-            // ============================================
             const duplicateCheck = hasDuplicatedMatriculas();
             if (duplicateCheck.hasDuplicates) {
                 alert('❌ BLOQUEADO: Existem matrículas duplicadas na tabela.\n\nMatrículas repetidas: ' + duplicateCheck.duplicatedValues.join(', ') + '\n\nPor favor, corrija as matrículas duplicadas antes de exportar o Excel.');
                 return;
             }
 
-            // ============================================
-            // VERIFICAÇÕES DE BLOQUEIO SEPARADAS
-            // ============================================
-            
-            // 1. Bloqueio de Liderança
-            if (checkLeadershipBlock()) {
-                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO ou N/A.\n\nEsses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\nPor favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
+            // LIDERANÇA: BLOQUEIA APENAS SE 'NÃO'. N/A LIBERA.
+            const leadershipErrors = checkLeadershipBlock();
+            if (leadershipErrors.length > 0) { 
+                const listaNomes = leadershipErrors.join('\n');
+                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO.\n\n' +
+                    'CANDIDATOS COM PENDÊNCIA:\n' + listaNomes + '\n\n' +
+                    'Esses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\n' +
+                    'Por favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
                 return;
             }
 
-            // 2. Bloqueio de Treinamento
-            const trainingErrors = checkTrainingBlock(); // Pega a lista de erros
-            if (trainingErrors.length > 0) {
-                // Junta a lista de nomes com quebras de linha
+            const trainingErrors = checkTrainingBlock();
+            if (trainingErrors.length > 0) { 
                 const listaNomes = trainingErrors.join('\n');
-                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO ou N/A.\n\n' +
+                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO.\n\n' +
                     'CANDIDATOS COM PENDÊNCIA:\n' + listaNomes + '\n\n' +
                     'Esse(s) candidato(s) não pode(m) ser movimentado(s) sem ter a Carta de Treinamento.\n\n' +
                     'Por favor, retire-o(s) da lista a ser enviada e contacte a Gerência do Departamento Pessoal para solicitar a elaboração da carta de treinamento e coleta das assinaturas, considerando o tempo de formação de até 90 dias, antes da solicitação de movimentação do empregado.');
@@ -1682,7 +1702,7 @@
             const empresaText = empresaSelect.options[empresaSelect.selectedIndex].text;
             
             const headers = [
-                'Matrícula', 'Nome Completo', 'Setor de Origem', 'Cargo Atual', 'Cód. Setor Destino',
+                'Matrícula', 'Nome Completo', 'Setor Atual', 'Cargo Atual', 'Cód. Setor Destino',
                 'Setor de Destino', 'Cargo Proposto', 'Cargo de Liderança?', 'R&S fez Avaliação?',
                 'Data Avaliação Comportamental', 'Em Treinamento?', 'Possui Carta?',
                 'Data Início Treinamento', 'É Substituição?', 'Matrícula Substituído', 'Nome Substituído',
@@ -1751,43 +1771,35 @@
             document.body.removeChild(link);
         }
 
-        // Mostrar modal de instruções
         function showInstructions() {
             document.getElementById('instructionsModal').classList.add('show');
         }
 
-        // Fechar modal de instruções
         function closeInstructions() {
             document.getElementById('instructionsModal').classList.remove('show');
         }
 
-        // Mostrar modal PDF
         function showPDFModal() {
-            // ============================================
-            // VALIDAÇÃO DE MATRÍCULAS DUPLICADAS
-            // ============================================
             const duplicateCheck = hasDuplicatedMatriculas();
             if (duplicateCheck.hasDuplicates) {
                 alert('❌ BLOQUEADO: Existem matrículas duplicadas na tabela.\n\nMatrículas repetidas: ' + duplicateCheck.duplicatedValues.join(', ') + '\n\nPor favor, corrija as matrículas duplicadas antes de gerar o PDF.');
                 return;
             }
 
-            // ============================================
-            // VERIFICAÇÕES DE BLOQUEIO SEPARADAS
-            // ============================================
-            
-            // 1. Bloqueio de Liderança
-            if (checkLeadershipBlock()) {
-                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO ou N/A.\n\nEsses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\nPor favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
+            const leadershipErrors = checkLeadershipBlock();
+            if (leadershipErrors.length > 0) { 
+                const listaNomes = leadershipErrors.join('\n');
+                alert('❌ BLOQUEADO: Existem candidatos com Cargo de Liderança = SIM e Avaliação Comportamental = NÃO.\n\n' +
+                    'CANDIDATOS COM PENDÊNCIA:\n' + listaNomes + '\n\n' +
+                    'Esses candidatos não podem ser movimentados sem a "Avaliação Comportamental" ter sido realizada por R & S.\n\n' +
+                    'Por favor, retire-o(s) da lista a ser enviada para a área de Remuneração e Performance');
                 return;
             }
 
-            // 2. Bloqueio de Treinamento
-            const trainingErrors = checkTrainingBlock(); // Pega a lista de erros
-            if (trainingErrors.length > 0) {
-                // Junta a lista de nomes com quebras de linha
+            const trainingErrors = checkTrainingBlock();
+            if (trainingErrors.length > 0) { 
                 const listaNomes = trainingErrors.join('\n');
-                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO ou N/A.\n\n' +
+                alert('❌ BLOQUEADO: Existem candidatos que estão com Treinamento = SIM e Possui Carta = NÃO.\n\n' +
                     'CANDIDATOS COM PENDÊNCIA:\n' + listaNomes + '\n\n' +
                     'Esse(s) candidato(s) não pode(m) ser movimentado(s) sem ter a Carta de Treinamento.\n\n' +
                     'Por favor, retire-o(s) da lista a ser enviada e contacte a Gerência do Departamento Pessoal para solicitar a elaboração da carta de treinamento e coleta das assinaturas, considerando o tempo de formação de até 90 dias, antes da solicitação de movimentação do empregado.');
@@ -1832,12 +1844,10 @@
             document.getElementById('pdfModal').classList.add('show');
         }
 
-        // Fechar modal PDF
         function closePDFModal() {
             document.getElementById('pdfModal').classList.remove('show');
         }
 
-        // Gerar PDF
         async function generatePDF() {
             closePDFModal();
             const responsavel = document.getElementById('responsavel').value;
@@ -1846,26 +1856,17 @@
             const today = new Date().toLocaleDateString('pt-BR');
             const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
 
-            // 1. Criar o container
             const pdfContent = document.createElement('div');
-            // 2. ESTILO ROBUSTO:
-            // Usamos 'block' normal para que ele ocupe espaço real no DOM.
-            // Definimos fundo branco e cor preta forçada.
             pdfContent.style.width = '289mm';
-            // Largura A4 Paisagem aproximada
             pdfContent.style.background = '#ffffff';
             pdfContent.style.color = '#000000';
             pdfContent.style.fontFamily = 'Arial, sans-serif';
             pdfContent.style.fontSize = '8pt';
             pdfContent.style.padding = '0';
             pdfContent.style.margin = '0 auto';
-            // Centraliza
             
-            // Importante: Isso garante que o elemento seja visível, mas não quebre o layout visual do usuário drasticamente
-            // Ele vai aparecer no final da página por um breve momento.
             pdfContent.style.display = 'block'; 
 
-            // Conteúdo HTML
             let htmlContent = `
                 <div style="text-align: center; margin-bottom: 15px; border-bottom: 3px solid #1e3a5f; padding-bottom: 10px;">
                     <h1 style="color: #1e3a5f; margin: 0; font-size: 16pt;">Tabela de Indicações para o Comitê</h1>
@@ -1939,7 +1940,6 @@
                 let dataDeslig = getDateFieldValue(dataDesligInput);
                 if (dataDeslig && dataDeslig !== 'N/A') dataDeslig = convertDateForDisplay(dataDeslig);
 
-                // TR com page-break-inside: avoid
                 htmlContent += `
                     <tr style="page-break-inside: avoid; background-color: #fff;">
                         <td style="border: 1px solid #ddd; padding: 2px;">${matriculaCompleta}</td>
@@ -1971,39 +1971,34 @@
 
             pdfContent.innerHTML = htmlContent;
 
-            // 3. ANEXAR AO FINAL DO BODY (Visível no fluxo normal)
             document.body.appendChild(pdfContent);
 
-            // Pequeno hack: Esperar o navegador renderizar o elemento antes de capturar
             await new Promise(resolve => setTimeout(resolve, 500));
 
             const options = {
-                margin: [5, 1, 5, 5], // Margens explícitas (Top, Left, Bottom, Right)
+                margin: [5, 1, 5, 5], 
                 filename: `Indicacoes_Promocao_${date}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
                     scale: 2,
                     useCORS: true,
-                    scrollY: 0, // Ignora o scroll atual da página
-                    logging: true // Útil para debug se necessário
+                    scrollY: 0, 
+                    logging: true 
                 },
                 jsPDF: { orientation: 'l', unit: 'mm', format: 'a4' },
                 pagebreak: { mode: ['css', 'legacy'] }
             };
 
-            // 4. Gerar e remover
             try {
                 await html2pdf().set(options).from(pdfContent).save();
             } catch (err) {
                 console.error('Erro ao gerar PDF:', err);
                 alert('Erro ao gerar PDF.');
             } finally {
-                // Remover o elemento temporário
                 document.body.removeChild(pdfContent);
             }
         }
 
-        // Fechar modais ao clicar fora
         window.onclick = function(event) {
             const pdfModal = document.getElementById('pdfModal');
             const instructionsModal = document.getElementById('instructionsModal');
@@ -2015,7 +2010,6 @@
             }
         }
 
-        // Atalhos de teclado
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'm') {
                 e.preventDefault();
